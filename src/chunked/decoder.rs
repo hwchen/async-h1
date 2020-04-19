@@ -1,11 +1,12 @@
 use std::fmt;
 use std::future::Future;
+use std::io;
 use std::ops::Range;
 use std::pin::Pin;
+use std::sync::Arc;
 use std::task::{Context, Poll};
 
-use async_std::io::{self, Read};
-use async_std::sync::Arc;
+use futures_io::AsyncRead;
 use byte_pool::{Block, BytePool};
 use http_types::trailers::{Trailers, TrailersSender};
 
@@ -19,7 +20,7 @@ lazy_static::lazy_static! {
 
 /// Decodes a chunked body according to
 /// https://tools.ietf.org/html/rfc7230#section-4.1
-pub(crate) struct ChunkedDecoder<R: Read> {
+pub(crate) struct ChunkedDecoder<R: AsyncRead> {
     /// The underlying stream
     inner: R,
     /// Buffer for the already read, but not yet parsed data.
@@ -35,7 +36,7 @@ pub(crate) struct ChunkedDecoder<R: Read> {
     trailer_sender: Option<TrailersSender>,
 }
 
-impl<R: Read> ChunkedDecoder<R> {
+impl<R: AsyncRead> ChunkedDecoder<R> {
     pub(crate) fn new(inner: R, trailer_sender: TrailersSender) -> Self {
         ChunkedDecoder {
             inner,
@@ -48,7 +49,7 @@ impl<R: Read> ChunkedDecoder<R> {
     }
 }
 
-impl<R: Read + Unpin> ChunkedDecoder<R> {
+impl<R: AsyncRead + Unpin> ChunkedDecoder<R> {
     fn poll_read_chunk(
         &mut self,
         cx: &mut Context<'_>,
@@ -198,7 +199,7 @@ impl<R: Read + Unpin> ChunkedDecoder<R> {
     }
 }
 
-impl<R: Read + Unpin> Read for ChunkedDecoder<R> {
+impl<R: AsyncRead + Unpin> AsyncRead for ChunkedDecoder<R> {
     #[allow(missing_doc_code_examples)]
     fn poll_read(
         mut self: Pin<&mut Self>,

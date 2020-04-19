@@ -1,10 +1,10 @@
 //! Process HTTP connections on the server.
 
+use std::io;
 use std::pin::Pin;
 
-use async_std::io;
-use async_std::io::prelude::*;
-use async_std::task::{Context, Poll};
+use futures_core::task::{Context, Poll};
+use futures_io::AsyncRead;
 use http_types::Response;
 
 use crate::chunked::ChunkedEncoder;
@@ -216,7 +216,7 @@ impl Encoder {
     }
 }
 
-impl Read for Encoder {
+impl AsyncRead for Encoder {
     fn poll_read(
         mut self: Pin<&mut Self>,
         cx: &mut Context<'_>,

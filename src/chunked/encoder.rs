@@ -1,8 +1,8 @@
+use std::io;
 use std::pin::Pin;
 
-use async_std::io;
-use async_std::io::prelude::*;
-use async_std::task::{Context, Poll};
+use futures_core::task::{Context, Poll};
+use futures_io::AsyncBufRead;
 use http_types::Response;
 
 const CR: u8 = b'\r';

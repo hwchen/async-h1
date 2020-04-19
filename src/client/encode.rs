@@ -1,9 +1,10 @@
-use async_std::io::{self, Read};
-use async_std::prelude::*;
-use async_std::task::{Context, Poll};
+use futures_core::task::{Context, Poll};
+use futures_io::AsyncRead;
+use futures_util::io::AsyncWriteExt;
 use http_types::format_err;
 use http_types::{Method, Request};
 
+use std::io;
 use std::pin::Pin;
 
 /// An HTTP encoder.
@@ -110,7 +111,7 @@ impl Encoder {
     }
 }
 
-impl Read for Encoder {
+impl AsyncRead for Encoder {
     fn poll_read(
         mut self: Pin<&mut Self>,
         cx: &mut Context<'_>,

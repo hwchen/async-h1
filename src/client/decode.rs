@@ -1,5 +1,5 @@
-use async_std::io::{BufReader, Read};
-use async_std::prelude::*;
+use futures_io::AsyncRead;
+use futures_util::io::{AsyncBufReadExt, AsyncReadExt, BufReader};
 use http_types::{ensure, ensure_eq, format_err};
 use http_types::{
     headers::{HeaderName, HeaderValue, CONTENT_LENGTH, DATE, TRANSFER_ENCODING},
@@ -20,7 +20,7 @@ const LF: u8 = b'\n';
 #[doc(hidden)]
 pub async fn decode<R>(reader: R) -> http_types::Result<Response>
 where
-    R: Read + Unpin + Send + Sync + 'static,
+    R: AsyncRead + AsyncReadExt + Unpin + Send + Sync + 'static,
 {
     let mut reader = BufReader::new(reader);
     let mut buf = Vec::new();
